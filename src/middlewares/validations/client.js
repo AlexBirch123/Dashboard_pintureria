@@ -1,6 +1,6 @@
 import { body } from 'express-validator';
 import { validateData } from './validationData.helper.js';
-import { Client } from '../../models/Cliente.model.js';
+import { Client } from '../../models/Client.model.js';
 
 
 const findDNI = async (value) => {

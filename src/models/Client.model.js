@@ -36,6 +36,10 @@ Client.init(
       allowNull: true,
       defaultValue: null,
     },
+    id_type_client: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   },
   {
     sequelize,
