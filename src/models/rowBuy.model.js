@@ -3,12 +3,12 @@ import { sequelize } from "../config/BD.js";
 
 
 // Clase para la creación de la tabla intermedia entre Buys y Product, para almacenar los productos de cada venta
-export class RowBuys extends Model {}
+export class RowBuy extends Model {}
 
-RowBuys.init(
+RowBuy.init(
   {
     id_buy: { 
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       primaryKey: true,
       references: {
         model: "buys",
@@ -16,7 +16,7 @@ RowBuys.init(
       },
     },
     id_prod: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       primaryKey: true,
       references: {
         model: "products",
@@ -45,6 +45,6 @@ RowBuys.init(
   },
   {
     sequelize,
-    modelName: "row_buys",
+    modelName: "rowBuy",
   }
 );

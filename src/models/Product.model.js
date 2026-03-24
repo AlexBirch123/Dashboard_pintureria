@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../config/BD.js";
-import { Category } from "./categoryProd.model.js";
+import { CategoryProd } from "./categoryProd.model.js";
 import { Provider } from "./provider.model.js";
 
 
@@ -41,18 +41,18 @@ Product.init(
       allowNull: true,
       defaultValue: 0,
       references: {
-        model: "provider",
+        model: "providers",
         key: "id",
       },
       onDelete: "SET NULL",
       onUpdate: "CASCADE",
     },
-    category_id: {
+    category_id: { //rubro del producto, ej: "pintura", "barniz", "diluyente", etc
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 0,
       references: {
-        model: "category",
+        model: "categoryProds",
         key: "id",
       },
       onDelete: "SET NULL",
@@ -61,23 +61,7 @@ Product.init(
   },
   {
     sequelize,
-    modelName: "products",
+    modelName: "product",
   }
 );
 
-Category.hasMany(Product, { foreignKey: "category_id" });
-Product.belongsTo(Category, { foreignKey: "category_id" });
-
-Product.belongsTo(Provider, { foreignKey: "provider_id" });
-Provider.hasMany(Product, { foreignKey: "provider_id" });
-
-// const categorias = await Categoria.findAll({
-//   include: {
-//     model: Producto,
-//     as: "productos",
-//   },
-// });
-
-// esto hace que al ahcer esa busqueda traiga los productos relacionados a cada categoria, 
-// y lo mismo para el caso de los proveedores, 
-// al hacer la busqueda de un producto traiga el proveedor relacionado a ese producto.

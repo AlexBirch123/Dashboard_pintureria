@@ -6,6 +6,9 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { appRouter } from "./routes/routes.js";
+import { sequelize } from "./config/BD.js";
+import "./models/init.models.js"; // Importa modelos y relaciones de la base de datos
+
 // import swaggerUI from "swagger-ui-express";
 // import { specs } from "./config/swagger.js";
 dotenv.config();
@@ -42,7 +45,22 @@ app.use((_, res) => {
   return res.status(404).json({ message: "Página no encontrada" });
 });
 
-// Inicia el servidor y escucha en el puerto especificado.
-app.listen(port, () => {
-  console.log(`Servidor escuchando en ${process.env.URL}`);
-});
+// Sincroniza modelos de base de datos e inicia serividor Express.
+const startServer = async () => {
+  try {
+    await sequelize.authenticate(); // Verifica conexión a la base de datos
+    console.log('Conexion establecida correctamente.');
+
+    await sequelize.sync({ alter: true }); // Sincroniza modelos con la base de datos, alterando tablas si es necesario
+    console.log('Modelos sincronizados y creados correctamente');
+    
+    app.listen(port, () => { // Inicia el servidor en el puerto especificado
+    console.log(`Servidor escuchando en ${process.env.URL}`);
+    });
+  
+  } catch (error) {
+    console.error("Error al iniciar servidor:", error);
+  }
+};
+
+startServer();

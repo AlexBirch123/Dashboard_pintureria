@@ -1,14 +1,12 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../config/BD.js";
-import { Provider } from "./provider.model.js";
-import { TypePayment } from "./typePayment.model.js";
-import { TypeVoucher } from "./typeVoucher.model.js";
+
 
 
 // Clase para la creación de la tabla Buys
-export class Buys extends Model {}
+export class Buy extends Model {}
 
-Buys.init(
+Buy.init(
   {
     id: {//nro de comprobante de la compra ej: "002-015226"
       type: DataTypes.STRING,
@@ -38,20 +36,20 @@ Buys.init(
     type_voucher: { 
       //Tipo de comprobante, si es R no tiene IVA, son costos de productos sin IVA
       //si es A se debe calcular el IVA del costo total
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "type_voucher",
+        model: "typeVouchers",
         key: "id",
       },
       onDelete: "RESTRICT",
       onUpdate: "CASCADE",
     },
     type_payment: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "type_payment",
+        model: "typePayments",
         key: "id",
       },
       onDelete: "RESTRICT",
@@ -66,16 +64,8 @@ Buys.init(
   },
   {
     sequelize,
-    modelName: "buys",
+    modelName: "buy",
   }
 );
 
 
-Provider.hasMany(Buys, { foreignKey: "id_provider" });
-Buys.belongsTo(Provider, { foreignKey: "id_provider" });
-
-TypePayment.hasMany(Buys, { foreignKey: "type_payment" });
-Buys.belongsTo(TypePayment, { foreignKey: "type_payment" });
-
-TypeVoucher.hasMany(Buys, { foreignKey: "type_voucher" });
-Buys.belongsTo(TypeVoucher, { foreignKey: "type_voucher" });

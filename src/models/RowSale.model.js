@@ -3,12 +3,12 @@ import { sequelize } from "../config/BD.js";
 
 
 // Clase para la creación de la tabla intermedia entre Sales y Product, para almacenar los productos de cada venta
-export class RowSales extends Model {}
+export class RowSale extends Model {}
 
-RowSales.init(
+RowSale.init(
   {
     id_sale: { 
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       primaryKey: true,
       references: {
         model: "sales",
@@ -16,7 +16,7 @@ RowSales.init(
       },
     },
     id_prod: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       primaryKey: true,
       references: {
         model: "products",
@@ -44,7 +44,7 @@ RowSales.init(
   },
   {
     sequelize,
-    modelName: "rowSales",
+    modelName: "rowSale",
   }
 );
 

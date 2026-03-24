@@ -3,9 +3,9 @@ import { sequelize } from "../config/BD.js";
 
 
 // Clase para la creación de la tabla Category
-export class Category extends Model {}
+export class CategoryProd extends Model {}
 
-Category.init(
+CategoryProd.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -19,7 +19,7 @@ Category.init(
   },
   {
     sequelize,
-    modelName: "category",
+    modelName: "categoryProd",
   }
 );
 

@@ -25,6 +25,6 @@ Provider.init(
   },
   {
     sequelize,
-    modelName: "providers",
+    modelName: "provider",
   }
 );
