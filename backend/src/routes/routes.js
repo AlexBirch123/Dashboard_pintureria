@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { routerClients } from "./Routers/clients.routes.js";
+import { crudRouter } from "./Routers/crud.routes.js";
 // import { routerProd } from "../routes/routers/Productos.routes.js";
 // import { routerRecover } from "../routes/routers/recover.routes.js";
 // import { routerUsu } from "../routes/routers/Usuario.routes.js";
@@ -20,7 +20,7 @@ export const appRouter = Router()
 // appRouter.post("/register", register);
 // appRouter.post("/login", login);
 // appRouter.post("/logout", logout);
-appRouter.use("/clients", routerClients);
+appRouter.use("/", crudRouter);
 // appRouter.use("/category", routerCat)
 // appRouter.use("/products", routerProd)
 // appRouter.use("/recover", routerRecover);

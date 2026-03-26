@@ -6,11 +6,13 @@ import { Sale } from "./sale.model.js";
 import { TypePayment } from "./typePayment.model.js";
 import { TypeVoucher } from "./typeVoucher.model.js";
 import { Buy } from "./buy.model.js";
-import { RowSale} from "./rowSale.model.js";
+import { RowSale} from "./RowSale.model.js";
 import { RowBuy } from "./rowBuy.model.js";
 import { History } from "./priceHistory.model.js";
 import { CreditNote } from "./creditNote.model.js";
-import { User } from "./user.model.js";
+import { User } from "./User.model.js";
+import { Branch } from "./branch.model.js";
+import { GeneralCost } from "./generalCost.model.js";
 
 TypePayment.hasMany(Sale, { foreignKey: "id_type_payment" });
 Sale.belongsTo(TypePayment, { foreignKey: "id_type_payment" }); 
@@ -75,6 +77,10 @@ Provider.hasMany(CreditNote, { foreignKey: "id_provider" });
 CreditNote.belongsTo(TypePayment, { foreignKey: "type_payment" });
 TypePayment.hasMany(CreditNote, { foreignKey: "type_payment" });
 
+//Un costo general pertenece a una sucursal, y una sucursal puede tener varios costos generales.
+Branch.hasMany(GeneralCost, { foreignKey: "id_branch" });
+GeneralCost.belongsTo(Branch, { foreignKey: "id_branch" });
+
 export {
   CategoryProd,
   Client,
@@ -88,5 +94,7 @@ export {
   RowBuy,
   History,
   CreditNote,
-  User
+  User,
+  Branch,
+  GeneralCost
 };

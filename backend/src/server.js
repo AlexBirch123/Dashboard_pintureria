@@ -33,7 +33,7 @@ app.use(cors({
 }));
 
 //Router con todas las rutas de la App
-app.use(appRouter)
+app.use("/api", appRouter)
 
 // Ruta para verificar el estado de la API.
 app.get("/", (req, res) => {

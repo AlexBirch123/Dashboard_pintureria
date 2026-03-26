@@ -17,7 +17,7 @@ Provider.init(
       allowNull: false,
     },
     cuit: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: false,
       unique: true,
       defaultValue: 0,
