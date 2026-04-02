@@ -1,74 +1,130 @@
-import { body } from 'express-validator';
-import { validateData } from './validationData.helper.js';
-import { Op } from 'sequelize';
-import { User } from '../../models/Usuario.model.js';
+// Valida credenciales y datos de usuario para auth y CRUD de usuarios.
+import { body } from "express-validator";
+import { Op } from "sequelize";
+import { User } from "../../models/User.model.js";
+import { validateData } from "./validationData.helper.js";
 
-const validatePassword = (password) =>{
-    const UpperCase = /[A-Z]/.test(password);
-    const LowerCase = /[a-z]/.test(password);
-    const Number = /\d/.test(password);
-    const MinimumLength = password.length >= 6;
+const validatePassword = (password) => {
+  const upperCase = /[A-Z]/.test(password);
+  const lowerCase = /[a-z]/.test(password);
+  const number = /\d/.test(password);
+  const minimumLength = password.length >= 6;
 
-    return UpperCase && LowerCase && Number && MinimumLength;
-}
+  return upperCase && lowerCase && number && minimumLength;
+};
 
-const findExisting = async (field, value,excludeId = null) => {
-    const whereClause = { [field]: value };
-    if (excludeId) whereClause.id = { [Op.not] : excludeId }; 
-    const existing = await User.findOne({ where: whereClause });
-    if(existing) throw new Error(`${field} already exists`);
-}
+const findExistingUser = async (field, value, excludeId = null) => {
+  const where = { [field]: value };
+
+  if (excludeId) {
+    where.id = { [Op.not]: excludeId };
+  }
+
+  const existing = await User.findOne({ where });
+  if (existing) {
+    throw new Error(`${field} ya existe.`);
+  }
+};
+
+const passwordRule = (field) =>
+  body(field)
+    .isString()
+    .withMessage(`${field} debe ser un texto`)
+    .bail()
+    .custom((value) => {
+      if (!validatePassword(value)) {
+        throw new Error("La contraseña debe tener al menos 6 caracteres, una mayuscula, una minuscula y un numero.");
+      }
+
+      return true;
+    });
 
 export const validateNewUser = [
-    body('userName')
-      .exists({checkFalsy:true}).not().isEmpty().withMessage('username should not be empty')
-      .isString().withMessage('address should be a string')
-      .bail()
-      .custom(async (value, { req }) => await findExisting('userName', value)),
-    body('pswHash')
-      .exists({checkFalsy:true}).not().isEmpty().withMessage('password should not be empty')
-      .isString().withMessage('password should be a string')
-      .bail()
-      .custom((value)=>{
-        if(!validatePassword(value)){
-          throw new Error('password should have at least 6 characters, one uppercase, one lowercase and one number');
-        }
-        return true;
-      }),
-    body('email')
-      .exists({checkFalsy:true}).not().isEmpty().withMessage('email should not be empty')
-      .isEmail().withMessage('email should be an email')
-      .bail()
-      .custom(async (value, { req }) => await findExisting('email', value)),
-    body('role')
-      .optional()
-      .isInt({min:1,max:3}).withMessage('role should be an integer between 1 and 3'),
-    validateData
+  body("name")
+    .exists({ checkFalsy: true })
+    .withMessage("name es obligatorio")
+    .isString()
+    .withMessage("name debe ser un texto"),
+  body("email")
+    .exists({ checkFalsy: true })
+    .withMessage("email es obligatorio")
+    .isEmail()
+    .withMessage("email debe ser valido")
+    .bail()
+    .custom((value) => findExistingUser("email", value)),
+  body("role")
+    .optional()
+    .isInt({ min: 1, max: 3 })
+    .withMessage("role debe ser un entero entre 1 y 3"),
+  body("psw_hash")
+    .exists({ checkFalsy: true })
+    .withMessage("psw_hash es obligatorio"),
+  passwordRule("psw_hash"),
+  validateData,
 ];
-  
+
 export const validateUpdateUser = [
-    body('userName')
-      .optional()
-      .isString().withMessage('address should be a string')
-      .bail()
-      .custom(async (value, { req }) => await findExisting('userName', value , req.params.id)),
-    body('pswHash')
-      .optional()
-      .isString().withMessage('password should be a string')
-      .bail()
-      .custom((value)=>{
-        if(!validatePassword(value)){
-          throw new Error('password should have at least 6 characters, one uppercase, one lowercase and one number');
-        }
-        return true;
-      }),
-    body('email')
-      .optional()
-      .isEmail().withMessage('email should be an email')
-      .bail()
-      .custom(async (value, { req }) => await findExisting('email', value , req.params.id)),
-    body('role')
-      .optional()
-      .isInt({min:1,max:3}).withMessage('role should be an integer between 1 and 3'),
-    validateData
+  body("name").optional().isString().withMessage("name debe ser un texto"),
+  body("email")
+    .optional()
+    .isEmail()
+    .withMessage("email debe ser valido")
+    .bail()
+    .custom((value, { req }) => findExistingUser("email", value, req.params.id)),
+  body("role")
+    .optional()
+    .isInt({ min: 1, max: 3 })
+    .withMessage("role debe ser un entero entre 1 y 3"),
+  body("psw_hash").optional(),
+  body("psw_hash")
+    .optional()
+    .isString()
+    .withMessage("psw_hash debe ser un texto")
+    .bail()
+    .custom((value) => {
+      if (!validatePassword(value)) {
+        throw new Error("La contraseña debe tener al menos 6 caracteres, una mayuscula, una minuscula y un numero.");
+      }
+
+      return true;
+    }),
+  validateData,
+];
+
+export const validateRegister = [
+  body("name")
+    .exists({ checkFalsy: true })
+    .withMessage("name es obligatorio")
+    .isString()
+    .withMessage("name debe ser un texto"),
+  body("email")
+    .exists({ checkFalsy: true })
+    .withMessage("email es obligatorio")
+    .isEmail()
+    .withMessage("email debe ser valido")
+    .bail()
+    .custom((value) => findExistingUser("email", value)),
+  body("password")
+    .exists({ checkFalsy: true })
+    .withMessage("password es obligatorio"),
+  passwordRule("password"),
+  body("role")
+    .optional()
+    .isInt({ min: 1, max: 3 })
+    .withMessage("role debe ser un entero entre 1 y 3"),
+  validateData,
+];
+
+export const validateLogin = [
+  body("email")
+    .exists({ checkFalsy: true })
+    .withMessage("email es obligatorio")
+    .isEmail()
+    .withMessage("email debe ser valido"),
+  body("password")
+    .exists({ checkFalsy: true })
+    .withMessage("password es obligatorio")
+    .isString()
+    .withMessage("password debe ser un texto"),
+  validateData,
 ];

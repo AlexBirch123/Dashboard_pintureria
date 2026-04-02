@@ -1,8 +1,9 @@
  
 //Archivo principal del servidor para la aplicación Pintureria usando Express.
 
+// Configura Express, CORS y cookies, y levanta la API junto con Sequelize.
 import express from "express";
-// import cookieParser from "cookie-parser";
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import { appRouter } from "./routes/routes.js";
@@ -21,12 +22,18 @@ export const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cookieParser());
 // app.use("/docs",swaggerUI.serve,swaggerUI.setup(specs))
-// app.use(cookieParser());
 // app.use("/uploads", express.static("uploads"));
 
+const allowedOrigins = [
+  process.env.URL_FRONT,
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+].filter(Boolean);
+
 app.use(cors({
-  origin:process.env.URL_FRONT,
+  origin: allowedOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT","PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]

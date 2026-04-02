@@ -1,32 +1,39 @@
-import { body } from 'express-validator';
-import { validateData } from './validationData.helper.js';
-import { Category } from '../../models/categorias.model.js';
-import { Op } from 'sequelize';
+// Valida altas y ediciones de categorias evitando descripciones duplicadas.
+import { body } from "express-validator";
+import { Op } from "sequelize";
+import { CategoryProd } from "../../models/categoryProd.model.js";
+import { validateData } from "./validationData.helper.js";
 
+const findCategoryByDescription = async (value, excludeId = null) => {
+  const where = { description: value };
 
-const findCat = async (value,excludId = null) => {
-  const whereClause = { description: value };
-  if(excludId)whereClause.id = { [Op.not] : excludId };
-  const cat = await Category.findOne({where: whereClause});
-  if(cat){
-    throw new Error('category already exists');
-  }}
+  if (excludeId) {
+    where.id = { [Op.not]: excludeId };
+  }
+
+  const category = await CategoryProd.findOne({ where });
+  if (category) {
+    throw new Error("La categoria ya existe.");
+  }
+};
 
 export const validateNewCat = [
-  body('description')
-    .exists({checkFalsy:true}).not().isEmpty().withMessage('description should not be empty')
-    .isString().withMessage('description should be a string')
+  body("description")
+    .exists({ checkFalsy: true })
+    .withMessage("description es obligatorio")
+    .isString()
+    .withMessage("description debe ser un texto")
     .bail()
-    .custom(async(value,{req})=> await findCat(value)),
-  body('imgUrl').optional().isString().withMessage('imgUrl should be a string'),
-  validateData
+    .custom((value) => findCategoryByDescription(value)),
+  validateData,
 ];
-  
+
 export const validateUpdateCat = [
-  body('description')
-  .optional().isString().withMessage('description should be an integer')
-  .bail()
-  .custom(async(value,{req})=> await findCat(value, req.params.id)),
-  body('imgUrl').optional().isString().withMessage('imgUrl should be a string'),
-  validateData
+  body("description")
+    .optional()
+    .isString()
+    .withMessage("description debe ser un texto")
+    .bail()
+    .custom((value, { req }) => findCategoryByDescription(value, req.params.id)),
+  validateData,
 ];

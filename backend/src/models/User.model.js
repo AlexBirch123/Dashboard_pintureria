@@ -1,3 +1,4 @@
+// Define la entidad User con email unico, contraseña hasheada y rol de acceso.
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../config/BD.js";
 
@@ -24,6 +25,15 @@ User.init(
     psw_hash: { 
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    role: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 2,
+      validate: {
+        min: 1,
+        max: 3,
+      },
     },
   },
   {

@@ -1,38 +1,83 @@
-import { body } from 'express-validator';
-import { validateData } from './validationData.helper.js';
-import { Client } from '../../models/Client.model.js';
+// Valida datos de clientes y controla unicidad de dni y cuit.
+import { body } from "express-validator";
+import { Op } from "sequelize";
+import { Client } from "../../models/Client.model.js";
+import { validateData } from "./validationData.helper.js";
 
-
-const findDNI = async (value) => {
-  const existingclient = await Client.findOne({where: {dni: value}});
-  if(existingclient){
-    throw new Error('DNI already exists');
+const findExistingClientField = async (field, value, excludeId = null) => {
+  if (value === undefined || value === null || value === "") {
+    return;
   }
-}
+
+  const where = { [field]: value };
+  if (excludeId) {
+    where.id = { [Op.not]: excludeId };
+  }
+
+  const existingClient = await Client.findOne({ where });
+  if (existingClient) {
+    throw new Error(`El campo ${field} ya existe.`);
+  }
+};
+
 export const validateNewClient = [
-  body('dni')
-    .exists({checkFalsy:true}).not().isEmpty().withMessage('DNI should not be empty')
-    .toInt()//se debe pasar a entero porque express-validator lo convierte a string
-    .isInt().withMessage('DNI should be an integer')
+  body("dni")
+    .optional({ values: "falsy" })
+    .isInt()
+    .withMessage("dni debe ser un numero entero")
     .bail()
-    .custom( async(value)=>{ await findDNI(value)}),
-  body('name')
-    .exists({checkFalsy:true}).not().isEmpty().withMessage('name should not be empty')
-    .isString().withMessage('name sould be a string'),
-  body('address').optional().isString().withMessage('address should be a string'),
-  body('phone').optional().isInt().withMessage('phone should be an integer'),
-  validateData
+    .custom((value) => findExistingClientField("dni", value)),
+  body("cuit")
+    .optional({ values: "falsy" })
+    .isInt()
+    .withMessage("cuit debe ser un numero entero")
+    .bail()
+    .custom((value) => findExistingClientField("cuit", value)),
+  body("name")
+    .exists({ checkFalsy: true })
+    .withMessage("name es obligatorio")
+    .isString()
+    .withMessage("name debe ser un texto"),
+  body("address")
+    .optional({ values: "falsy" })
+    .isString()
+    .withMessage("address debe ser un texto"),
+  body("phone")
+    .optional({ values: "falsy" })
+    .isInt()
+    .withMessage("phone debe ser un numero entero"),
+  body("painter")
+    .optional()
+    .isBoolean()
+    .withMessage("painter debe ser booleano"),
+  validateData,
 ];
 
 export const validateUpdateClient = [
-    body('dni')
-      .optional()
-      .toInt() //se debe pasar a entero porque express-validator lo convierte a string
-      .isInt().withMessage('DNI should be an integer')
-      .bail()
-      .custom( async(value)=>{ await findDNI(value)}),        
-    body('name').optional().isString().withMessage('name sould be a string'),
-    body('address').optional().isString().withMessage('address should be a string'),
-    body('phone').optional().isInt().withMessage('phone should be an integer'),
-    validateData
-  ];
+  body("dni")
+    .optional({ values: "falsy" })
+    .isInt()
+    .withMessage("dni debe ser un numero entero")
+    .bail()
+    .custom((value, { req }) => findExistingClientField("dni", value, req.params.id)),
+  body("cuit")
+    .optional({ values: "falsy" })
+    .isInt()
+    .withMessage("cuit debe ser un numero entero")
+    .bail()
+    .custom((value, { req }) => findExistingClientField("cuit", value, req.params.id)),
+  body("name").optional().isString().withMessage("name debe ser un texto"),
+  body("address")
+    .optional({ values: "falsy" })
+    .isString()
+    .withMessage("address debe ser un texto"),
+  body("phone")
+    .optional({ values: "falsy" })
+    .isInt()
+    .withMessage("phone debe ser un numero entero"),
+  body("painter")
+    .optional()
+    .isBoolean()
+    .withMessage("painter debe ser booleano"),
+  validateData,
+];

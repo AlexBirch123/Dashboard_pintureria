@@ -1,3 +1,7 @@
+
+//Registro centralizado de modelos que mapea recursos con sus correspondientes modelos de base de datos para facilitar la gestión 
+//y acceso a las entidades de la aplicación.
+ 
 import {
   CategoryProd,
   Client,

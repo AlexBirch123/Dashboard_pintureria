@@ -1,33 +1,47 @@
-import { body } from 'express-validator';
-import { Branch } from '../../models/Sucursal.model.js';
-import { validateData } from './validationData.helper.js';
-import { Op } from 'sequelize';
+// Valida altas y ediciones de sucursales segun el modelo actual de Branch.
+import { body } from "express-validator";
+import { Op } from "sequelize";
+import { Branch } from "../../models/branch.model.js";
+import { validateData } from "./validationData.helper.js";
 
-const findAddress = async (value,excludId = null) => {
-  const whereClause = { address: value };
-  if(excludId)whereClause.id = { [Op.not] : excludId };
-  const branch = await Branch.findOne({where: whereClause});
-  if(branch){
-    throw new Error('address already exists');
-  }}
+const findBranchByDescription = async (value, excludeId = null) => {
+  const where = { description: value };
+
+  if (excludeId) {
+    where.id = { [Op.not]: excludeId };
+  }
+
+  const branch = await Branch.findOne({ where });
+  if (branch) {
+    throw new Error("La sucursal ya existe.");
+  }
+};
 
 export const validateNewBranch = [
-    body('address')
-      .exists({checkFalsy:true}).not().isEmpty().withMessage('address should not be empty')
-      .isString().withMessage('address should be a string')
-      .bail()
-      .custom(async (value, { req }) => await findAddress(value)),
-    body('phone')
-      .exists({checkFalsy:true}).not().isEmpty().withMessage('phone should not be empty')
-      .isInt().withMessage('phone should be a string'),
-    validateData
+  body("description")
+    .exists({ checkFalsy: true })
+    .withMessage("description es obligatorio")
+    .isString()
+    .withMessage("description debe ser un texto")
+    .bail()
+    .custom((value) => findBranchByDescription(value)),
+  body("address")
+    .optional({ values: "falsy" })
+    .isString()
+    .withMessage("address debe ser un texto"),
+  validateData,
 ];
-  
+
 export const validateUpdateBranch = [
-    body('address')
-      .optional().isString().withMessage('address should be a string')
-      .bail()
-      .custom(async (value, { req }) => await findAddress(value, req.params.id)),
-    body('phone').optional().isInt().withMessage('phone should be an integer'),
-    validateData
+  body("description")
+    .optional()
+    .isString()
+    .withMessage("description debe ser un texto")
+    .bail()
+    .custom((value, { req }) => findBranchByDescription(value, req.params.id)),
+  body("address")
+    .optional({ values: "falsy" })
+    .isString()
+    .withMessage("address debe ser un texto"),
+  validateData,
 ];

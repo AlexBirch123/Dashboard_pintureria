@@ -1,79 +1,93 @@
-import { body } from 'express-validator';
-import { validateData } from './validationData.helper.js';
-import { Client } from '../../models/Cliente.model.js';
-import { User } from '../../models/Usuario.model.js';
-import { Branch } from '../../models/Sucursal.model.js';
-import { Employee } from '../../models/Empleados.model.js';
-import { Product } from '../../models/Productos.model.js';
+// Valida ventas y confirma que cliente, tipo de pago y comprobante existan.
+import { body } from "express-validator";
+import { Client } from "../../models/Client.model.js";
+import { TypePayment } from "../../models/typePayment.model.js";
+import { TypeVoucher } from "../../models/typeVoucher.model.js";
+import { validateData } from "./validationData.helper.js";
 
+const ensureClientExists = async (value) => {
+  const client = await Client.findByPk(value);
+  if (!client) {
+    throw new Error("id_client no existe.");
+  }
+};
+
+const ensureTypePaymentExists = async (value) => {
+  const typePayment = await TypePayment.findByPk(value);
+  if (!typePayment) {
+    throw new Error("id_type_payment no existe.");
+  }
+};
+
+const ensureTypeVoucherExists = async (value) => {
+  const typeVoucher = await TypeVoucher.findByPk(value);
+  if (!typeVoucher) {
+    throw new Error("id_type_voucher no existe.");
+  }
+};
+
+const sharedRules = [
+  body("id_client")
+    .optional()
+    .isInt()
+    .withMessage("id_client debe ser un entero")
+    .bail()
+    .custom((value) => ensureClientExists(value)),
+  body("id_type_payment")
+    .optional()
+    .isInt()
+    .withMessage("id_type_payment debe ser un entero")
+    .bail()
+    .custom((value) => ensureTypePaymentExists(value)),
+  body("id_type_voucher")
+    .optional()
+    .isInt()
+    .withMessage("id_type_voucher debe ser un entero")
+    .bail()
+    .custom((value) => ensureTypeVoucherExists(value)),
+  body("date")
+    .optional({ values: "falsy" })
+    .isISO8601()
+    .withMessage("date debe ser una fecha valida"),
+  body("total")
+    .optional()
+    .isFloat({ gt: 0 })
+    .withMessage("total debe ser mayor a 0"),
+  body("discount")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("discount debe ser mayor o igual a 0"),
+];
 
 export const validateNewSale = [
-    body('idClient')
-    .optional().isInt().withMessage('idClient should be an integer')
+  body("id_client")
+    .exists({ checkFalsy: true })
+    .withMessage("id_client es obligatorio")
+    .isInt()
+    .withMessage("id_client debe ser un entero")
     .bail()
-    .custom(async(value) => {
-        const client = await Client.findOne({where: {id: value}});
-        if(!client) throw new Error('idClient does not exist');
-        return true;
-       }),
-
-    body('idUser')
-    .optional().isInt().withMessage('isUser should be an integer')
+    .custom((value) => ensureClientExists(value)),
+  body("id_type_payment")
+    .exists({ checkFalsy: true })
+    .withMessage("id_type_payment es obligatorio")
+    .isInt()
+    .withMessage("id_type_payment debe ser un entero")
     .bail()
-    .custom(async(value) => {
-        const user = await User.findOne({where: {id: value}});
-        if(!user) throw new Error('idUser does not exist');
-        return true;
-       }),
-
-    body('idEmp')
-      .exists({checkFalsy:true}).not().isEmpty().withMessage('idEmp should not be empty')
-      .isInt().withMessage('idEmp should be an integer')
-      .bail()
-      .custom(async(value) => {
-        const emp = await Employee.findOne({where: {id: value}});
-        if(!emp) throw new Error('idEmp does not exist');
-        return true;
-       }),
-
-    body('idBranch')
-      .exists({checkFalsy:true}).not().isEmpty().withMessage('idBranch should not be empty')
-      .isInt().withMessage('idBranch should be an integer')
-      .bail()
-      .custom(async(value) => {
-        const branch = await Branch.findOne({where: {id: value}});
-        if(!branch) throw new Error('idBranch does not exist');
-        return true;
-       }),
-
-    body('total')
-      .exists({checkFalsy:true}).not().isEmpty().withMessage('total should not be empty')
-      .isInt().withMessage('total should be an integer')
-      .bail()
-      .custom((value) => {
-        if(value === 0) throw new Error('total should be greater than 0');
-        return true;
-       }),
-
-    body('paymentId').optional().isInt().withMessage('paymentId should be an integer'),
-    
-    body('saleProds')
-      .exists({checkFalsy:true}).not().isEmpty().withMessage('saleProds should not be empty')
-      .isArray().withMessage('saleProds should be an Array')
-      .bail()
-      .custom(async(value) => {
-        if(value.length === 0) throw new Error('saleProds should have at least one product');
-        for(const prod of value){
-            
-            if(!prod.idProd || !prod.quantity || !prod.price) throw new Error('each product should have idProd, quantity and price');
-            if(!isInteger(prod.idProd)) throw new Error('idProd should be an integer');
-            if(!isInteger(prod.quantity) || prod.quantity <= 0 ) throw new Error('quantity should be greater than 0');
-            if(!isInteger(prod.price) ||prod.price <= 0) throw new Error('price should be greater than 0');
-            
-            const productBD = await Product.findOne({where: {id: prod.idProd}});
-            if(!productBD) throw new Error('idProd does not exist');    
-        }
-       }),
-    validateData
+    .custom((value) => ensureTypePaymentExists(value)),
+  body("id_type_voucher")
+    .exists({ checkFalsy: true })
+    .withMessage("id_type_voucher es obligatorio")
+    .isInt()
+    .withMessage("id_type_voucher debe ser un entero")
+    .bail()
+    .custom((value) => ensureTypeVoucherExists(value)),
+  body("total")
+    .exists({ checkFalsy: true })
+    .withMessage("total es obligatorio")
+    .isFloat({ gt: 0 })
+    .withMessage("total debe ser mayor a 0"),
+  ...sharedRules,
+  validateData,
 ];
-  
+
+export const validateUpdateSale = [...sharedRules, validateData];

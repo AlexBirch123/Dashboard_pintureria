@@ -1,3 +1,5 @@
+//Helper para manejo de errores de validación de datos
+
 import { validationResult } from 'express-validator';
 
 
