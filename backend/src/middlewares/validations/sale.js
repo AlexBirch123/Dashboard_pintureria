@@ -1,6 +1,7 @@
 // Valida ventas y confirma que cliente, tipo de pago y comprobante existan.
 import { body } from "express-validator";
 import { Client } from "../../models/Client.model.js";
+import { Branch } from "../../models/branch.model.js";
 import { TypePayment } from "../../models/typePayment.model.js";
 import { TypeVoucher } from "../../models/typeVoucher.model.js";
 import { validateData } from "./validationData.helper.js";
@@ -26,7 +27,21 @@ const ensureTypeVoucherExists = async (value) => {
   }
 };
 
+const ensureBranchExists = async (value) => {
+  const branch = await Branch.findByPk(value);
+  if (!branch) {
+    throw new Error("id_branch no existe.");
+  }
+};
+
 const sharedRules = [
+  body("id")
+    .optional()
+    .isString()
+    .withMessage("id debe ser un texto")
+    .bail()
+    .matches(/^\d{5}-\d{8}$/)
+    .withMessage("id debe tener formato 00007-00001101"),
   body("id_client")
     .optional()
     .isInt()
@@ -45,6 +60,12 @@ const sharedRules = [
     .withMessage("id_type_voucher debe ser un entero")
     .bail()
     .custom((value) => ensureTypeVoucherExists(value)),
+  body("id_branch")
+    .optional()
+    .isInt()
+    .withMessage("id_branch debe ser un entero")
+    .bail()
+    .custom((value) => ensureBranchExists(value)),
   body("date")
     .optional({ values: "falsy" })
     .isISO8601()
@@ -60,6 +81,14 @@ const sharedRules = [
 ];
 
 export const validateNewSale = [
+  body("id")
+    .exists({ checkFalsy: true })
+    .withMessage("id es obligatorio")
+    .isString()
+    .withMessage("id debe ser un texto")
+    .bail()
+    .matches(/^\d{5}-\d{8}$/)
+    .withMessage("id debe tener formato 00007-00001101"),
   body("id_client")
     .exists({ checkFalsy: true })
     .withMessage("id_client es obligatorio")
@@ -81,6 +110,13 @@ export const validateNewSale = [
     .withMessage("id_type_voucher debe ser un entero")
     .bail()
     .custom((value) => ensureTypeVoucherExists(value)),
+  body("id_branch")
+    .exists({ checkFalsy: true })
+    .withMessage("id_branch es obligatorio")
+    .isInt()
+    .withMessage("id_branch debe ser un entero")
+    .bail()
+    .custom((value) => ensureBranchExists(value)),
   body("total")
     .exists({ checkFalsy: true })
     .withMessage("total es obligatorio")

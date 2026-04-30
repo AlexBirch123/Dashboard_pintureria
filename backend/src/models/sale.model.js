@@ -5,15 +5,15 @@ import { sequelize } from "../config/BD.js";
 // Clase para la creación de la tabla Sales
 export class Sale extends Model {}
 
-Sale.init( //falta agregar las sucursales
+Sale.init(
   {
-    id: { 
-      //nro de comprobante de la venta
-      //por este ID se deben juntar todas los items de esta venta para generer una unica venta
-      //ya que la lista trae todos los items de todas las ventas
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+    id: {
+      // Nro de comprobante de la venta, por ejemplo 00007-00001101.
+      type: DataTypes.STRING(14),
       primaryKey: true,
+      validate: {
+        is: /^\d{5}-\d{8}$/,
+      },
     },
     id_client: { //dni o cuit del cliente
       type: DataTypes.INTEGER,
@@ -46,9 +46,20 @@ Sale.init( //falta agregar las sucursales
     id_type_voucher: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      primaryKey: true,
       references: {
         model: "typeVouchers",
         key: "id",},
+      onDelete: "RESTRICT",
+      onUpdate: "CASCADE",
+    },
+    id_branch: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "branches",
+        key: "id",
+      },
       onDelete: "RESTRICT",
       onUpdate: "CASCADE",
     },

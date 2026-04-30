@@ -8,12 +8,12 @@ export class RowBuy extends Model {}
 RowBuy.init(
   {
     id_buy: { 
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(14),
       primaryKey: true,
-      references: {
-        model: "buys",
-        key: "id",
-      },
+    },
+    type_voucher: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
     },
     id_prod: {
       type: DataTypes.STRING,

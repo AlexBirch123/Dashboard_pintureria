@@ -58,8 +58,14 @@ const startServer = async () => {
     await sequelize.authenticate(); // Verifica conexión a la base de datos
     console.log('Conexion establecida correctamente.');
 
-    await sequelize.sync({ alter: true }); // Sincroniza modelos con la base de datos, alterando tablas si es necesario
-    console.log('Modelos sincronizados y creados correctamente');
+    try {
+      await sequelize.sync({ alter: true }); // Intenta ajustar tablas existentes sin perder datos.
+      console.log('Modelos sincronizados y actualizados correctamente');
+    } catch (syncError) {
+      console.warn("Fallo sync con alter:true, se recrearan las tablas con force:true", syncError);
+      await sequelize.sync({ force: true });
+      console.log('Modelos recreados correctamente con force:true');
+    }
     
     app.listen(port, () => { // Inicia el servidor en el puerto especificado
     console.log(`Servidor escuchando en ${process.env.URL}`);

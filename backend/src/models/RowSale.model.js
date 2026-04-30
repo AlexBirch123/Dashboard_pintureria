@@ -8,12 +8,12 @@ export class RowSale extends Model {}
 RowSale.init(
   {
     id_sale: { 
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(14),
       primaryKey: true,
-      references: {
-        model: "sales",
-        key: "id",
-      },
+    },
+    id_type_voucher: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
     },
     id_prod: {
       type: DataTypes.STRING,

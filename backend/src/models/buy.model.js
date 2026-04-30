@@ -8,11 +8,12 @@ export class Buy extends Model {}
 
 Buy.init(
   {
-    id: {//nro de comprobante de la compra ej: "002-015226"
-      type: DataTypes.STRING,
+    id: {
+      // Nro de comprobante de la compra, por ejemplo 00007-00001101.
+      type: DataTypes.STRING(14),
       primaryKey: true,
       validate: {
-        is: /^[0-9]-[0-9]$/,
+        is: /^\d{5}-\d{8}$/,
       },
     },
     date: {
@@ -38,6 +39,7 @@ Buy.init(
       //si es A se debe calcular el IVA del costo total
       type: DataTypes.INTEGER,
       allowNull: false,
+      primaryKey: true,
       references: {
         model: "typeVouchers",
         key: "id",

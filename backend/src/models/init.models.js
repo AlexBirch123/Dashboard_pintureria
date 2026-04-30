@@ -27,6 +27,10 @@ Client.hasMany(Sale, { foreignKey: "id_client" });
 Sale.belongsTo(Client, { foreignKey: "id_client" }); 
 //una venta tiene un cliente, pero un cliente puede estar asociado a varias ventas.
 
+Branch.hasMany(Sale, { foreignKey: "id_branch" });
+Sale.belongsTo(Branch, { foreignKey: "id_branch" });
+//una venta pertenece a una sucursal y una sucursal puede tener varias ventas.
+
 //un producto tiene una unica categoria y una categoria tiene varios productos
 CategoryProd.hasMany(Product, { foreignKey: "category_id" });
 Product.belongsTo(CategoryProd, { foreignKey: "category_id" });
